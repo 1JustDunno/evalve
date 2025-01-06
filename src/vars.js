@@ -9,6 +9,7 @@ export var global = {
     space: {},
     interstellar: {},
     portal: {},
+    eden: {},
     tauceti: {},
     civic: {},
     race: {},
@@ -1204,14 +1205,36 @@ if (convertVersion(global['version']) <= 103015){
     }
 }
 
-global['version'] = '1.3.16';
+if (convertVersion(global['version']) <= 103017){
+    if (global.race['broody']){
+        global.race['gloomy'] = global.race['broody'];
+        delete global.race['broody'];
+    }
+}
+
+if (convertVersion(global['version']) <= 104000){
+    if (global.city.hasOwnProperty('shrine') && !global.city.shrine.hasOwnProperty('cycle')){
+        global.city.shrine['cycle'] = 0;
+    }
+}
+
+if (convertVersion(global['version']) < 104001){
+    if(global.tech['elysium'] && global.tech.elysium >= 18){
+        global.tech.elysium--;
+        if(global.tech.cement && !global.race['flier']){
+            global.tech.cement = 8;
+        }
+    }
+}
+
+global['version'] = '1.4.1';
 global['revision'] = 'a';
 delete global['beta'];
 
 if (!global.hasOwnProperty('prestige')){
     global.prestige = {};
 }
-['Plasmid','AntiPlasmid','Phage','Dark','Harmony','AICore','Artifact','Blood_Stone'].forEach(function (res){
+['Plasmid','AntiPlasmid','Phage','Dark','Harmony','AICore','Artifact','Blood_Stone','Supercoiled'].forEach(function (res){
     if (!global.prestige.hasOwnProperty(res)){
         global.prestige[res] = { count: 0 };
     }
@@ -1227,7 +1250,7 @@ if (!global.hasOwnProperty('support')){
 
 [
     'moon','red','belt','alpha','nebula','gateway','alien2','lake','spire',
-    'titan','enceladus','eris','tau_home','tau_red','tau_roid'
+    'titan','enceladus','eris','tau_home','tau_red','tau_roid','asphodel'
 ].forEach(function(s){
     if (!global.support.hasOwnProperty(s)){
         global.support[s] = [];
@@ -1378,6 +1401,10 @@ if (!global['galaxy']){
     global['galaxy'] = {};
 }
 
+if (!global['eden']){
+    global['eden'] = {};
+}
+
 if (global.interstellar['mass_ejector'] && !global.interstellar.mass_ejector['Bolognium']){
     global.interstellar.mass_ejector['Bolognium'] = 0;
 }
@@ -1469,9 +1496,9 @@ export function setupStats(){
     [
         'reset','plasmid','antiplasmid','universes','phage','starved','tstarved','died','tdied',
         'sac','tsac','know','tknow','portals','dkills','attacks','cfood','tfood','cstone','tstone',
-        'clumber','tlumber','mad','bioseed','cataclysm','blackhole','ascend','descend','terraform',
-        'aiappoc','matrix','retire','eden','geck','dark','harmony','blood','cores','artifact',
-        'cattle','tcattle','murders','tmurders','psykill','tpsykill'
+        'clumber','tlumber','mad','bioseed','cataclysm','blackhole','ascend','descend','apotheosis',
+        'terraform','aiappoc','matrix','retire','eden','geck','dark','harmony','blood','cores','artifact',
+        'supercoiled','cattle','tcattle','murders','tmurders','psykill','tpsykill','pdebt','uDead'
     ].forEach(function(k){
         if (!global.stats.hasOwnProperty(k)){
             global.stats[k] = 0;
@@ -1516,6 +1543,19 @@ export function setupStats(){
             b4: { l: false, h: false, a: false, e: false, m: false, mg: false }, 
             b5: { l: false, h: false, a: false, e: false, m: false, mg: false }
         };
+    }
+    if (!global.stats.hasOwnProperty('death_tour')){
+        global.stats['death_tour'] = {
+            ct: { l: 0, h: 0, a: 0, e: 0, m: 0, mg: 0 }, 
+            bh: { l: 0, h: 0, a: 0, e: 0, m: 0, mg: 0 }, 
+            di: { l: 0, h: 0, a: 0, e: 0, m: 0, mg: 0 }, 
+            ai: { l: 0, h: 0, a: 0, e: 0, m: 0, mg: 0 }, 
+            vc: { l: 0, h: 0, a: 0, e: 0, m: 0, mg: 0 },
+            md: { l: 0, h: 0, a: 0, e: 0, m: 0, mg: 0 }
+        };
+    }
+    if (global.stats['death_tour'] && !global.stats.death_tour.hasOwnProperty('md')){
+        global.stats.death_tour['md'] = { l: 0, h: 0, a: 0, e: 0, m: 0, mg: 0 };
     }
 }
 
@@ -1748,42 +1788,14 @@ if (!global.city['hot']){
     global.city['hot'] = 0;
 }
 
-if (!global.city.morale['unemployed']){
-    global.city.morale['unemployed'] = 0;
-}
-if (!global.city.morale['leadership']){
-    global.city.morale['leadership'] = 0;
-}
-if (!global.city.morale['warmonger']){
-    global.city.morale['warmonger'] = 0;
-}
-if (!global.city.morale['rev']){
-    global.city.morale['rev'] = 0;
-}
-if (!global.city.morale['tax']){
-    global.city.morale['tax'] = 0;
-}
-if (!global.city.morale['shrine']){
-    global.city.morale['shrine'] = 0;
-}
-if (!global.city.morale['blood_thirst']){
-    global.city.morale['blood_thirst'] = 0;
-}
-if (!global.city.morale['broadcast']){
-    global.city.morale['broadcast'] = 0;
-}
-if (!global.city.morale['vr']){
-    global.city.morale['vr'] = 0;
-}
-if (!global.city.morale['zoo']){
-    global.city.morale['zoo'] = 0;
-}
-if (!global.city.morale['cap']){
-    global.city.morale['cap'] = 0;
-}
-if (!global.city.morale['potential']){
-    global.city.morale['potential'] = 0;
-}
+[
+    'unemployed','leadership','warmonger','rev','tax','shrine','blood_thirst',
+    'broadcast','vr','zoo','bliss_den','restaurant','cap','potential'
+].forEach(function(k){
+    if (!global.city.morale.hasOwnProperty(k)){
+        global.city.morale[k] = 0;
+    }
+});
 
 if (!global.city['calendar']){
     global.city['calendar'] = {
@@ -1925,6 +1937,7 @@ if (!global.race['purgatory']){
         city: {},
         space: {},
         portal: {},
+        eden: {},
         tech: {},
     };
 }
@@ -1978,7 +1991,7 @@ export function keyMultiplier(){
     return number;
 }
 
-function convertVersion(version){
+export function convertVersion(version){
     let vNum = version.split('.',3);
     vNum[0] *= 100000;
     vNum[1] *= 1000;
@@ -2026,6 +2039,8 @@ var affix_list = {
 // Number formatting options, in the user's default locale
 var numFormatShort = new Intl.NumberFormat(undefined, {maximumFractionDigits: 2, maximumSignificantDigits: 3, roundingMode: 'trunc', roundingPriority: 'lessPrecision'});
 var numFormatLong = new Intl.NumberFormat(undefined, {maximumFractionDigits: 2, maximumSignificantDigits: 4, roundingMode: 'trunc', roundingPriority: 'lessPrecision'});
+// Constant value that is used frequently
+const ADD_16_ULP = 1 + (16 * Number.EPSILON);
 
 /**
  * Return a locale-dependent string that represents the significance of the input value.
@@ -2042,8 +2057,13 @@ var numFormatLong = new Intl.NumberFormat(undefined, {maximumFractionDigits: 2, 
  * @return {String}
  */
 export function sizeApproximation(value, precision = 1, precise = false, exact = false){
-    const absValue = Math.abs(value);
+    let absValue = Math.abs(value);
     let oom = Math.floor(Math.log10(absValue));
+
+    // Increase magnitude of all numbers by 16 to 32 ULP to avoid rounding issues
+    absValue *= ADD_16_ULP;
+    // Explicitly avoid adding anything to either -0 or +0 to avoid altering the sign
+    value = value<0 ? -absValue : value>0 ? absValue : value;
 
     // Exact mode:
     //  The number of significant figures is not limited in any way.
@@ -2222,8 +2242,8 @@ function setRegionStates(reset){
         base: [
             'showCiv','showCity','showIndustry','showPowerGrid','showMechLab','showShipYard',
             'showResearch','showCivic','showMil','showResources','showMarket','showStorage',
-            'showGenetics','showSpace','showDeep','showGalactic','showPortal','showOuter',
-            'showTau','showEjector','showCargo','showAlchemy','showGovernor','arpa','showPsychic'
+            'showGenetics','showSpace','showDeep','showGalactic','showPortal','showEden','showOuter',
+            'showTau','showEjector','showCargo','showAlchemy','showGovernor','arpa','showPsychic','showWish'
         ],
         space: [
             'moon','red','hell','sun','gas','gas_moon','belt','dwarf','alpha','proxima',
@@ -2231,6 +2251,7 @@ function setRegionStates(reset){
             'alien1','alien2','chthonian','titan','enceladus','triton','eris','kuiper'
         ],
         portal: ['fortress','badlands','pit','ruins','gate','lake','spire'],
+        eden: ['asphodel','elysium','isle','palace'],
         tau: ['home','red','roid','gas','gas2','star']
     };
     
@@ -2275,6 +2296,7 @@ export function clearStates(){
     global.interstellar = {};
     global.galaxy = {};
     global.portal = {};
+    global.eden = {};
     global.starDock = {};
     global.tauceti = {};
     global.civic = { new: 0 };
@@ -2342,6 +2364,7 @@ export function clearStates(){
     global.stats.sac = 0;
     global.stats.cattle = 0;
     global.stats.murders = 0;
+    global.stats.uDead = 0;
     global.settings.at = 0;
 
     global.settings.showEvolve = true;
